@@ -1,40 +1,35 @@
-# @dawpm/registry — frontend + JSON API
+# dawpm/registry
 
-The dawpm registry: a Next.js 15 app deployed to Vercel that fronts the
-[yanncotineau/dawpm-registry](https://github.com/yanncotineau/dawpm-registry)
-data repo. Lives at https://dawpm-registry.vercel.app.
+The Next.js frontend at [dawpm-registry.yanncotineau.dev](https://dawpm-registry.yanncotineau.dev). Browse plugins in the UI, or hit `/api/v1/plugins` from the CLI.
 
-## How it works
-
-- The data repo compiles its yaml files to `v1/plugins.json` and publishes to
-  GitHub Pages via Actions.
-- This frontend reads that JSON via a hourly-revalidated `fetch`, so most
-  requests hit Next.js' cache.
-- When the data repo's GHA finishes, it pings a Vercel deploy hook so the
-  frontend redeploys and the next request gets the new JSON.
+The plugin data lives in a separate repo: [yanncotineau/dawpm-registry](https://github.com/yanncotineau/dawpm-registry). That repo compiles its yaml into `v1/plugins.json` and publishes to GitHub Pages. This app fetches that JSON, caches it, and pings a Vercel deploy hook to refresh whenever the data changes.
 
 ## Endpoints
 
-- `GET /` — search + plugin grid.
-- `GET /p/<ns>/<name>` — plugin detail page.
-- `GET /api/v1/plugins[?q=]` — JSON list (consumed by the CLI).
-- `GET /api/v1/plugins/<ns>/<name>` — single plugin JSON (consumed by the CLI).
+- `/` — search + plugin grid
+- `/p/<ns>/<name>` — plugin detail
+- `/ns/<ns>` — every plugin from a namespace
+- `/tag/<tag>` — every plugin with a tag
+- `/api/v1/plugins[?q=]` and `/api/v1/plugins/<ns>/<name>` — JSON for the CLI
 
-## Local dev
+## Run locally
 
 ```sh
 pnpm install
 pnpm dev
 ```
 
-Override the data source via env:
+Point at a different data source while developing:
 
 ```sh
 DAWPM_REGISTRY_DATA_URL=http://localhost:8080/v1/plugins.json pnpm dev
 ```
 
-## Deploy
+## Self-hosting
 
-Vercel project, root = `registry/`. Set `DAWPM_REGISTRY_DATA_URL` to the
-deployed Pages URL. Add the Vercel deploy-hook URL as
-`VERCEL_DAWPM_REGISTRY_DEPLOY_HOOK` secret in the data repo.
+Deploy to Vercel, root = `registry/`. Set:
+
+- `DAWPM_REGISTRY_DATA_URL` — where to fetch the compiled `plugins.json` from
+- `NEXT_PUBLIC_REGISTRY_URL` — the public URL this instance is served at; the home page shows a `~/.dawpmrc` snippet so users can point their CLI at you
+
+Add the Vercel deploy-hook URL as a secret in the data repo so it can poke this app on each push.
