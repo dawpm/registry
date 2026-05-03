@@ -50,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               Add a plugin by opening a PR on{' '}
               <a
                 className="underline underline-offset-4 decoration-dotted hover:text-[var(--color-ink)]"
-                href="https://github.com/dawpm/registry-data"
+                href="https://github.com/dawpm"
               >
                 the registry data repo
               </a>
