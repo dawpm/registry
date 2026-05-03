@@ -39,10 +39,9 @@ export default async function TagPage({
       <BackLink>all plugins</BackLink>
 
       <header>
-        <h1 className="text-2xl font-bold tracking-tight">
-          <span className="text-[var(--color-accent)]">#{decoded}</span>
-        </h1>
-        <p className="text-sm text-[var(--color-muted)] mt-1">
+        <div className="eyebrow mb-3">tag</div>
+        <h1 className="h-display text-[clamp(48px,9vw,96px)]">#{decoded}</h1>
+        <p className="font-mono text-[11px] uppercase tracking-wider text-[var(--color-muted)] mt-3">
           {total} plugin{total === 1 ? '' : 's'}
         </p>
       </header>

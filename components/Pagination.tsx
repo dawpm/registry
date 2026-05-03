@@ -1,88 +1,66 @@
+'use client';
+
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-export function Pagination({
-  page,
-  totalPages,
-  hrefForPage,
-}: {
+type Props = {
   page: number;
   totalPages: number;
-  hrefForPage: (p: number) => string;
-}) {
+} & (
+  | { onPageChange: (p: number) => void; hrefForPage?: never }
+  | { hrefForPage: (p: number) => string; onPageChange?: never }
+);
+
+export function Pagination({ page, totalPages, onPageChange, hrefForPage }: Props) {
   if (totalPages <= 1) return null;
 
-  const prev = page > 1 ? hrefForPage(page - 1) : null;
-  const next = page < totalPages ? hrefForPage(page + 1) : null;
-
-  const numbers: (number | '…')[] = [];
+  const numbers: (number | 'gap')[] = [];
   if (totalPages <= 7) {
     for (let i = 1; i <= totalPages; i++) numbers.push(i);
   } else {
     numbers.push(1);
-    if (page > 3) numbers.push('…');
+    if (page > 3) numbers.push('gap');
     for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
       numbers.push(i);
     }
-    if (page < totalPages - 2) numbers.push('…');
+    if (page < totalPages - 2) numbers.push('gap');
     numbers.push(totalPages);
   }
 
-  return (
-    <nav className="mt-10 flex items-center justify-center gap-1.5 text-sm">
-      <PageBtn href={prev} disabled={!prev}>
-        <ChevronLeft className="w-4 h-4" /> Prev
-      </PageBtn>
-      <div className="flex items-center gap-0.5 mx-1">
-        {numbers.map((n, i) =>
-          typeof n === 'number' ? (
-            <Link
-              key={i}
-              href={hrefForPage(n)}
-              className={`min-w-[2rem] px-2.5 py-1.5 text-center rounded-md transition-colors ${
-                n === page
-                  ? 'bg-[var(--color-accent)] text-[var(--color-accent-fg)] font-semibold'
-                  : 'text-[var(--color-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]'
-              }`}
-            >
-              {n}
-            </Link>
-          ) : (
-            <span key={i} className="px-1 text-[var(--color-muted)]">
-              {n}
-            </span>
-          ),
-        )}
-      </div>
-      <PageBtn href={next} disabled={!next}>
-        Next <ChevronRight className="w-4 h-4" />
-      </PageBtn>
-    </nav>
-  );
-}
+  const baseBtn =
+    'inline-flex items-center justify-center min-w-[2.25rem] h-9 px-3 font-mono text-[11px] font-bold uppercase tracking-wider rounded-md border border-[var(--color-rule)] transition-colors';
+  const hover = 'hover:bg-[var(--color-ink)] hover:text-[var(--color-cream)] hover:border-[var(--color-ink)]';
+  const active = 'bg-[var(--color-ink)] text-[var(--color-cream)] border-[var(--color-ink)]';
+  const disabled = 'opacity-30 cursor-not-allowed';
 
-function PageBtn({
-  href,
-  disabled,
-  children,
-}: {
-  href: string | null;
-  disabled?: boolean;
-  children: React.ReactNode;
-}) {
-  const cls =
-    'flex items-center gap-1 px-2.5 py-1.5 rounded-md border border-[var(--color-border)] transition-colors';
-  if (disabled || !href) {
+  function PageItem({ n, current }: { n: number; current: boolean }) {
+    const cls = `${baseBtn} ${current ? active : hover}`;
+    if (hrefForPage) return <Link href={hrefForPage(n)} className={cls}>{n}</Link>;
+    return <button type="button" onClick={() => onPageChange?.(n)} className={cls}>{n}</button>;
+  }
+
+  function NavBtn({ to, label, icon }: { to: number | null; label: string; icon: React.ReactNode }) {
+    const cls = `${baseBtn} gap-1`;
+    if (to === null) return <span className={`${cls} ${disabled}`}>{icon}{label}</span>;
+    if (hrefForPage) return <Link href={hrefForPage(to)} className={`${cls} ${hover}`}>{icon}{label}</Link>;
     return (
-      <span className={`${cls} text-[var(--color-muted)]/40 cursor-not-allowed`}>{children}</span>
+      <button type="button" onClick={() => onPageChange?.(to)} className={`${cls} ${hover}`}>
+        {icon}{label}
+      </button>
     );
   }
+
   return (
-    <Link
-      href={href}
-      className={`${cls} text-[var(--color-muted)] hover:text-[var(--color-text)] hover:border-[var(--color-accent)]/40`}
-    >
-      {children}
-    </Link>
+    <nav className="mt-12 flex items-center justify-center gap-1.5">
+      <NavBtn to={page > 1 ? page - 1 : null} label="Prev" icon={<ChevronLeft className="w-3.5 h-3.5" />} />
+      <div className="flex items-center gap-1 mx-1">
+        {numbers.map((n, i) =>
+          n === 'gap'
+            ? <span key={i} className="px-1 text-[var(--color-muted)] font-mono text-xs">…</span>
+            : <PageItem key={i} n={n} current={n === page} />,
+        )}
+      </div>
+      <NavBtn to={page < totalPages ? page + 1 : null} label="Next" icon={<ChevronRight className="w-3.5 h-3.5" />} />
+    </nav>
   );
 }

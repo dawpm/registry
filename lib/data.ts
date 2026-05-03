@@ -6,18 +6,12 @@ function dataUrl(): string {
   return process.env.DAWPM_REGISTRY_DATA_URL ?? DEFAULT_DATA_URL;
 }
 
-/**
- * Fetch and cache the compiled registry index. Uses Next.js' fetch cache
- * with hourly revalidation; the data repo's GHA pings our deploy hook for
- * immediate updates anyway.
- */
 export async function getIndex(): Promise<RegistryIndex> {
   const res = await fetch(dataUrl(), { next: { revalidate: 3600, tags: ['registry'] } });
   if (!res.ok) {
     throw new Error(`failed to fetch registry data: ${res.status} ${res.statusText}`);
   }
-  const json = await res.json();
-  return RegistryIndexSchema.parse(json);
+  return RegistryIndexSchema.parse(await res.json());
 }
 
 export async function getPlugin(slug: string): Promise<Plugin | null> {
@@ -25,15 +19,26 @@ export async function getPlugin(slug: string): Promise<Plugin | null> {
   return idx.plugins.find(p => p.slug === slug) ?? null;
 }
 
+/**
+ * Match a plugin against a search needle.
+ *
+ * We deliberately match only the human-name, slug, and tags. Description
+ * matching adds too much noise: most DSK descriptions cross-reference each
+ * other, so searching for one plugin name returns dozens of results.
+ */
+export function matchesQuery(p: Plugin, needle: string): boolean {
+  if (!needle) return true;
+  const n = needle.toLowerCase();
+  return (
+    p.name.toLowerCase().includes(n) ||
+    p.slug.toLowerCase().includes(n) ||
+    p.tags.some(t => t.toLowerCase().includes(n))
+  );
+}
+
 export async function searchPlugins(q: string | undefined): Promise<Plugin[]> {
   const idx = await getIndex();
-  if (!q) return idx.plugins;
-  const needle = q.toLowerCase();
-  return idx.plugins.filter(p =>
-    p.slug.toLowerCase().includes(needle) ||
-    p.name.toLowerCase().includes(needle) ||
-    p.description.toLowerCase().includes(needle) ||
-    p.tags.some(t => t.toLowerCase().includes(needle)) ||
-    p.author.toLowerCase().includes(needle)
-  );
+  const needle = q?.trim().toLowerCase() ?? '';
+  if (!needle) return idx.plugins;
+  return idx.plugins.filter(p => matchesQuery(p, needle));
 }

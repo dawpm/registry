@@ -1,9 +1,9 @@
 /**
  * Display helpers shared across the registry UI.
  *
- * Internally a plugin slug is "ns/name" — that's the on-disk path in the
- * data repo and the path segment in URLs. User-facing strings always show
- * "@ns/name" (npm-style) so install commands look familiar.
+ * Internally a plugin slug is "ns/name" (the on-disk path in the data
+ * repo and the path segment in URLs). User-facing strings always show
+ * "@ns/name" so install commands look familiar.
  */
 
 export function displaySlug(slug: string): string {
@@ -25,11 +25,14 @@ export function initials(name: string): string {
     .join('');
 }
 
-/** Where this Vercel deployment can be reached, for showing in the .dawpmrc snippet. */
+/**
+ * Public URL of this registry instance, shown in the .dawpmrc snippet.
+ *
+ * Set NEXT_PUBLIC_REGISTRY_URL on Vercel (Project Settings -> Environment
+ * Variables) to point at your custom domain.
+ */
 export function publicUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_REGISTRY_URL ??
-    process.env.NEXT_PUBLIC_VERCEL_URL ??
-    'https://dawpm-registry.yanncotineau.dev'
-  ).replace(/\/+$/, '').replace(/^(?!https?:\/\/)/, 'https://');
+  const fromEnv = process.env.NEXT_PUBLIC_REGISTRY_URL?.trim();
+  const url = fromEnv && fromEnv.length > 0 ? fromEnv : 'https://dawpm-registry.yanncotineau.dev';
+  return url.replace(/\/+$/, '').replace(/^(?!https?:\/\/)/, 'https://');
 }

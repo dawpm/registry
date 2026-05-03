@@ -15,29 +15,14 @@ export function CopyCommand({ command, label }: { command: string; label?: strin
     }
   };
   return (
-    <div className="group">
-      {label && (
-        <div className="text-[10px] uppercase tracking-wider text-[var(--color-muted)] mb-1.5 px-1">
-          {label}
-        </div>
-      )}
-      <button
-        type="button"
-        onClick={onCopy}
-        className="font-mono text-[13px] bg-[var(--color-surface)] hover:bg-[var(--color-elevated)] border border-[var(--color-border)] hover:border-[var(--color-accent)]/40 rounded-lg px-3.5 py-2.5 w-full text-left flex items-center justify-between gap-3 transition-all duration-150"
-      >
+    <div>
+      {label && <div className="eyebrow mb-2">{label}</div>}
+      <button type="button" onClick={onCopy} className="code-chip">
         <span className="truncate">
-          <span className="text-[var(--color-muted)] select-none">$ </span>
+          <span className="opacity-60 select-none">$ </span>
           {command}
         </span>
-        <span
-          className={`flex items-center justify-center w-6 h-6 rounded-md transition-colors ${
-            copied
-              ? 'text-[var(--color-accent)]'
-              : 'text-[var(--color-muted)] group-hover:text-[var(--color-text)]'
-          }`}
-          aria-label={copied ? 'copied' : 'copy'}
-        >
+        <span className="flex items-center justify-center w-5 h-5 shrink-0" aria-label={copied ? 'copied' : 'copy'}>
           {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
         </span>
       </button>
