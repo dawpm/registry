@@ -46,7 +46,11 @@ export default async function NamespacePage({
       </header>
 
       <PluginGrid plugins={items} />
-      <Pagination basePath={`/ns/${ns}`} page={page} totalPages={totalPages} />
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        hrefForPage={p => (p === 1 ? `/ns/${ns}` : `/ns/${ns}?page=${p}`)}
+      />
     </div>
   );
 }

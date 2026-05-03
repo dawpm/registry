@@ -48,7 +48,11 @@ export default async function TagPage({
       </header>
 
       <PluginGrid plugins={items} />
-      <Pagination basePath={`/tag/${tag}`} page={page} totalPages={totalPages} />
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        hrefForPage={p => (p === 1 ? `/tag/${tag}` : `/tag/${tag}?page=${p}`)}
+      />
     </div>
   );
 }

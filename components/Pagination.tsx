@@ -2,19 +2,18 @@ import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export function Pagination({
-  basePath,
   page,
   totalPages,
+  hrefForPage,
 }: {
-  basePath: string;
   page: number;
   totalPages: number;
+  hrefForPage: (p: number) => string;
 }) {
   if (totalPages <= 1) return null;
 
-  const href = (p: number) => (p === 1 ? basePath : `${basePath}?page=${p}`);
-  const prev = page > 1 ? href(page - 1) : null;
-  const next = page < totalPages ? href(page + 1) : null;
+  const prev = page > 1 ? hrefForPage(page - 1) : null;
+  const next = page < totalPages ? hrefForPage(page + 1) : null;
 
   const numbers: (number | '…')[] = [];
   if (totalPages <= 7) {
@@ -39,7 +38,7 @@ export function Pagination({
           typeof n === 'number' ? (
             <Link
               key={i}
-              href={href(n)}
+              href={hrefForPage(n)}
               className={`min-w-[2rem] px-2.5 py-1.5 text-center rounded-md transition-colors ${
                 n === page
                   ? 'bg-[var(--color-accent)] text-[var(--color-accent-fg)] font-semibold'
